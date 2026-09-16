@@ -1,0 +1,81 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(AT32M412_Template C ASM)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(MCU_FLAGS
+    -mcpu=cortex-m4
+    -mthumb
+)
+
+add_compile_options(
+    ${MCU_FLAGS}
+
+    -O2
+    -Wall
+
+    -ffunction-sections
+    -fdata-sections
+)
+
+file(GLOB_RECURSE APP_SOURCES
+    Src/*.c
+)
+
+file(GLOB_RECURSE DRIVER_SOURCES
+    libraries/cmsis/cm4/device_support/*.c
+    libraries/drivers/src/*.c
+)
+
+set(STARTUP_SOURCE
+    libraries/cmsis/cm4/device_support/startup/gcc/startup_at32m412_416.s
+)
+
+
+
+add_executable(${PROJECT_NAME}.elf
+    ${APP_SOURCES}
+    ${DRIVER_SOURCES}
+    ${STARTUP_SOURCE}
+)
+
+target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
+    AT32M412CBT7
+)
+
+target_include_directories(${PROJECT_NAME}.elf PRIVATE
+    libraries/cmsis/cm4/device_support
+    libraries/cmsis/cm4/core_support
+    libraries/drivers/inc
+)
+
+target_link_options(${PROJECT_NAME}.elf PRIVATE
+    ${MCU_FLAGS}
+
+    -T${CMAKE_SOURCE_DIR}/libraries/AT32M412xB_FLASH.ld
+
+    -Wl,--gc-sections
+    -Wl,-Map=${PROJECT_NAME}.map
+
+    --specs=nano.specs
+    --specs=nosys.specs
+)
+
+add_custom_command(
+    TARGET ${PROJECT_NAME}.elf
+    POST_BUILD
+
+    COMMAND arm-none-eabi-objcopy
+        -O ihex
+        ${PROJECT_NAME}.elf
+        ${PROJECT_NAME}.hex
+
+    COMMAND arm-none-eabi-objcopy
+        -O binary
+        ${PROJECT_NAME}.elf
+        ${PROJECT_NAME}.bin
+
+    COMMAND arm-none-eabi-size
+        ${PROJECT_NAME}.elf
+)

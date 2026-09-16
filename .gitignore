@@ -1,0 +1,10 @@
+# 通用嵌入式/MCU 项目 .gitignore
+# 根据项目实际忽略常见的构建产物、IDE 配置与临时文件
+
+# Build output
+/build/
+
+# IDE / Editor
+.vscode/
+
+
