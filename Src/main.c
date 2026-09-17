@@ -37,7 +37,7 @@ int main(void)
   while (1)
   {
     gpio_bits_toggle(GPIOC, GPIO_PINS_13);
-    delay_ms(500U);
+    delay_ms(250U);
   }
 
   return 0;
